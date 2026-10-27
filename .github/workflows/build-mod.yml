@@ -1,0 +1,96 @@
+name: Build mod APK
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Apply mod changes
+        run: |
+          set -e
+          # 1. Debris spawns stacked at the exact centre of the broken asteroid
+          sed -i 's/"Fragment start (× parent radius)", 0.3f/"Fragment start (× parent radius)", 0f/' \
+            app/src/main/java/com/astroloop/game/tuning/KnobsAsteroids.kt
+          grep -q '"Fragment start (× parent radius)", 0f' app/src/main/java/com/astroloop/game/tuning/KnobsAsteroids.kt
+
+          # 2. Fixed signing key so updates keep your saves
+          base64 -d > app/mod.keystore <<'KEY'
+          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
+          KEY
+
+          # 3. Separate app ("Astro Loop Mod") with the dev/cheat menu enabled
+          python3 - <<'PY'
+          p = 'app/build.gradle.kts'
+          s = open(p).read()
+          a = '    signingConfigs {\n'
+          b = '        debug {\n            isMinifyEnabled = false\n        }'
+          assert s.count(a) == 1 and s.count(b) == 1, 'build file changed upstream'
+          s = s.replace(a, a + '        getByName("debug") {\n            storeFile = file("mod.keystore")\n            storePassword = "android"\n            keyAlias = "androiddebugkey"\n            keyPassword = "android"\n        }\n')
+          s = s.replace(b, '        debug {\n            isMinifyEnabled = false\n            applicationIdSuffix = ".mod"\n            versionNameSuffix = "-mod"\n        }')
+          open(p, 'w').write(s)
+          PY
+          mkdir -p app/src/debug/res/values
+          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <string name="app_name">Astro Loop Mod</string>\n</resources>\n' \
+            > app/src/debug/res/values/strings.xml
+
+      - name: Build
+        run: chmod +x gradlew && ./gradlew assembleGameDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: astro-loop-mod
+          path: app/build/outputs/apk/game/debug/*.apk
