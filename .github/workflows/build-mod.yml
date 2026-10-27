@@ -16,13 +16,128 @@ jobs:
       - name: Apply mod changes
         run: |
           set -e
-          # 1. Debris spawns stacked at the exact centre of the broken asteroid
-          sed -i 's/"Fragment start (× parent radius)", 0.3f/"Fragment start (× parent radius)", 0f/' \
-            app/src/main/java/com/astroloop/game/tuning/KnobsAsteroids.kt
-          grep -q '"Fragment start (× parent radius)", 0f' app/src/main/java/com/astroloop/game/tuning/KnobsAsteroids.kt
-
-          # 2. Fixed signing key so updates keep your saves
-          base64 -d > app/mod.keystore <<'KEY'
+          base64 -d > /tmp/mod.patch <<'PATCH'
+          ZGlmZiAtLWdpdCBhL2FwcC9idWlsZC5ncmFkbGUua3RzIGIvYXBwL2J1aWxkLmdyYWRsZS5rdHMK
+          aW5kZXggZTA3MTllMS4uNmM5YWJkZSAxMDA2NDQKLS0tIGEvYXBwL2J1aWxkLmdyYWRsZS5rdHMK
+          KysrIGIvYXBwL2J1aWxkLmdyYWRsZS5rdHMKQEAgLTU2LDYgKzU2LDEzIEBAIGFuZHJvaWQgewog
+          ICAgIH0KIAogICAgIHNpZ25pbmdDb25maWdzIHsKKyAgICAgICAgLy8gRml4ZWQga2V5IHNvIG1v
+          ZCB1cGRhdGVzIGluc3RhbGwgb3ZlciBlYWNoIG90aGVyIHdpdGhvdXQgd2lwaW5nIHNhdmVzCisg
+          ICAgICAgIGdldEJ5TmFtZSgiZGVidWciKSB7CisgICAgICAgICAgICBzdG9yZUZpbGUgPSBmaWxl
+          KCJtb2QtZGVidWcua2V5c3RvcmUiKQorICAgICAgICAgICAgc3RvcmVQYXNzd29yZCA9ICJhbmRy
+          b2lkIgorICAgICAgICAgICAga2V5QWxpYXMgPSAiYW5kcm9pZGRlYnVna2V5IgorICAgICAgICAg
+          ICAga2V5UGFzc3dvcmQgPSAiYW5kcm9pZCIKKyAgICAgICAgfQogICAgICAgICBpZiAoaGFzUmVs
+          ZWFzZUtleXN0b3JlKSB7CiAgICAgICAgICAgICBjcmVhdGUoInJlbGVhc2UiKSB7CiAgICAgICAg
+          ICAgICAgICAgc3RvcmVGaWxlID0gZmlsZShrZXlzdG9yZVByb3BlcnRpZXMuZ2V0UHJvcGVydHko
+          InN0b3JlRmlsZSIpKQpAQCAtODYsNiArOTMsOSBAQCBhbmRyb2lkIHsKICAgICAgICAgfQogICAg
+          ICAgICBkZWJ1ZyB7CiAgICAgICAgICAgICBpc01pbmlmeUVuYWJsZWQgPSBmYWxzZQorICAgICAg
+          ICAgICAgLy8gTW9kIGJ1aWxkOiBpbnN0YWxscyBhbG9uZ3NpZGUgdGhlIEYtRHJvaWQgY29weQor
+          ICAgICAgICAgICAgYXBwbGljYXRpb25JZFN1ZmZpeCA9ICIubW9kIgorICAgICAgICAgICAgdmVy
+          c2lvbk5hbWVTdWZmaXggPSAiLW1vZCIKICAgICAgICAgfQogICAgIH0KIApkaWZmIC0tZ2l0IGEv
+          YXBwL3NyYy9kZWJ1Zy9yZXMvdmFsdWVzL3N0cmluZ3MueG1sIGIvYXBwL3NyYy9kZWJ1Zy9yZXMv
+          dmFsdWVzL3N0cmluZ3MueG1sCm5ldyBmaWxlIG1vZGUgMTAwNjQ0CmluZGV4IDAwMDAwMDAuLjZh
+          ZTc4YzQKLS0tIC9kZXYvbnVsbAorKysgYi9hcHAvc3JjL2RlYnVnL3Jlcy92YWx1ZXMvc3RyaW5n
+          cy54bWwKQEAgLTAsMCArMSw0IEBACis8P3htbCB2ZXJzaW9uPSIxLjAiIGVuY29kaW5nPSJ1dGYt
+          OCI/PgorPHJlc291cmNlcz4KKyAgICA8c3RyaW5nIG5hbWU9ImFwcF9uYW1lIj5Bc3RybyBMb29w
+          IE1vZDwvc3RyaW5nPgorPC9yZXNvdXJjZXM+CmRpZmYgLS1naXQgYS9hcHAvc3JjL21haW4vamF2
+          YS9jb20vYXN0cm9sb29wL2dhbWUvY29yZS9EZWJ1Z0FjdGlvbkRpc3BhdGNoLmt0IGIvYXBwL3Ny
+          Yy9tYWluL2phdmEvY29tL2FzdHJvbG9vcC9nYW1lL2NvcmUvRGVidWdBY3Rpb25EaXNwYXRjaC5r
+          dAppbmRleCA4OWY3MjM1Li5kZmU1MmZjIDEwMDY0NAotLS0gYS9hcHAvc3JjL21haW4vamF2YS9j
+          b20vYXN0cm9sb29wL2dhbWUvY29yZS9EZWJ1Z0FjdGlvbkRpc3BhdGNoLmt0CisrKyBiL2FwcC9z
+          cmMvbWFpbi9qYXZhL2NvbS9hc3Ryb2xvb3AvZ2FtZS9jb3JlL0RlYnVnQWN0aW9uRGlzcGF0Y2gu
+          a3QKQEAgLTE5NSw2ICsxOTUsNyBAQCBvYmplY3QgRGVidWdBY3Rpb25EaXNwYXRjaCB7CiAgICAg
+          ICAgICAgICAgICAgcC5zZXREZXNlcnRHb29kRW5kaW5nKCkKICAgICAgICAgICAgICAgICBEZWJ1
+          Z01pcnJvci5wb3B1bGF0ZShzdGF0ZSwgcCkKICAgICAgICAgICAgIH0KKyAgICAgICAgICAgICJB
+          RERfWUVOIiAtPiBwLmFkZFllbigxMDAwKQogICAgICAgICAgICAgIkNMUl9ERVNFUlQiIC0+IHsK
+          ICAgICAgICAgICAgICAgICBwLmNsZWFyRGVzZXJ0Q29tcGxldGVkKCkKICAgICAgICAgICAgICAg
+          ICBwLmNsZWFyRGVzZXJ0R29vZEVuZGluZygpCmRpZmYgLS1naXQgYS9hcHAvc3JjL21haW4vamF2
+          YS9jb20vYXN0cm9sb29wL2dhbWUvY29yZS9HYW1lU3VyZmFjZVZpZXcua3QgYi9hcHAvc3JjL21h
+          aW4vamF2YS9jb20vYXN0cm9sb29wL2dhbWUvY29yZS9HYW1lU3VyZmFjZVZpZXcua3QKaW5kZXgg
+          ZWNkNWE4Yi4uYzVjNGNhMCAxMDA2NDQKLS0tIGEvYXBwL3NyYy9tYWluL2phdmEvY29tL2FzdHJv
+          bG9vcC9nYW1lL2NvcmUvR2FtZVN1cmZhY2VWaWV3Lmt0CisrKyBiL2FwcC9zcmMvbWFpbi9qYXZh
+          L2NvbS9hc3Ryb2xvb3AvZ2FtZS9jb3JlL0dhbWVTdXJmYWNlVmlldy5rdApAQCAtODIzOCw3ICs4
+          MjM4LDcgQEAgY2xhc3MgR2FtZVN1cmZhY2VWaWV3KAogICAgICAgICAvLyBkaXZpc2lvbi4gR2F0
+          ZWQgaGVyZSBhcyB3ZWxsIGFzIGF0IHRoZSB0b3VjaCBzaXRlOiB0aGUgY2xhc3MgaXMgY29tcGls
+          ZWQgaW50byByZWxlYXNlCiAgICAgICAgIC8vIGVpdGhlciB3YXkgYW5kIGl0IGlzIHRoZSB0cmln
+          Z2VyIG5ldmVyIGJlaW5nIGFybWVkIHRoYXQgbWFrZXMgaXQgdW5yZWFjaGFibGUsIHdoaWNoIGlz
+          CiAgICAgICAgIC8vIHRoZSBzYW1lIGFyZ3VtZW50IHRoZSBwYXVzZS1ob2xkJ3Mgb3duIGNvbW1l
+          bnQgbWFrZXMgYXQgOjkxMjIuCi0gICAgICAgIGlmIChCdWlsZENvbmZpZy5ERUJVRykgeworICAg
+          ICAgICBpZiAoZmFsc2UpIHsgLy8gbW9kOiBubyBkZXYgYnV0dG9uIGR1cmluZyBydW5zCiAgICAg
+          ICAgICAgICBpZiAoIWRlYnVnQnV0dG9uTG9hZGVkKSB7CiAgICAgICAgICAgICAgICAgZGVidWdC
+          dXR0b24ubG9hZChQZXJzaXN0ZW5jZU1hbmFnZXIoY29udGV4dCksIHdpZHRoLnRvRmxvYXQoKSwg
+          aGVpZ2h0LnRvRmxvYXQoKSkKICAgICAgICAgICAgICAgICBkZWJ1Z0J1dHRvbkxvYWRlZCA9IHRy
+          dWUKQEAgLTg1NTMsNyArODU1Myw3IEBAIGNsYXNzIEdhbWVTdXJmYWNlVmlldygKICAgICBvdmVy
+          cmlkZSBmdW4gb25Ub3VjaEV2ZW50KGV2ZW50OiBNb3Rpb25FdmVudCk6IEJvb2xlYW4gewogICAg
+          ICAgICAvLyBUaGUgZmxvYXRpbmcgb3BlbmVyIGdldHMgZmlyc3QgcmVmdXNhbCwgaW4gcmF3IGRl
+          dmljZSBwaXhlbHMuIEFib3ZlIHRoZSBkZWJ1Zy1tZW51CiAgICAgICAgIC8vIGJsb2NrIG9uIHB1
+          cnBvc2U6IHRoZSBidXR0b24gbXVzdCBzdGF5IHVzYWJsZSB3aGlsZSB0aGUgbWVudSBpcyBvcGVu
+          LgotICAgICAgICBpZiAoQnVpbGRDb25maWcuREVCVUcpIHsKKyAgICAgICAgaWYgKGZhbHNlKSB7
+          IC8vIG1vZDogbm8gZGV2IGJ1dHRvbiBkdXJpbmcgcnVucwogICAgICAgICAgICAgd2hlbiAoZGVi
+          dWdCdXR0b24ub25Ub3VjaChldmVudCwgd2lkdGgudG9GbG9hdCgpLCBoZWlnaHQudG9GbG9hdCgp
+          KSkgewogICAgICAgICAgICAgICAgIERlYnVnRmxvYXRpbmdCdXR0b24uT3V0Y29tZS5UQVBQRUQg
+          LT4gewogICAgICAgICAgICAgICAgICAgICBzdGF0ZS5kZWJ1Z01lbnVPcGVuID0gIXN0YXRlLmRl
+          YnVnTWVudU9wZW4KZGlmZiAtLWdpdCBhL2FwcC9zcmMvbWFpbi9qYXZhL2NvbS9hc3Ryb2xvb3Av
+          Z2FtZS9oYW5nYXIvSGFuZ2FyU3VyZmFjZVZpZXcua3QgYi9hcHAvc3JjL21haW4vamF2YS9jb20v
+          YXN0cm9sb29wL2dhbWUvaGFuZ2FyL0hhbmdhclN1cmZhY2VWaWV3Lmt0CmluZGV4IDBhMDY5NjAu
+          LmVjY2ZhYzcgMTAwNjQ0Ci0tLSBhL2FwcC9zcmMvbWFpbi9qYXZhL2NvbS9hc3Ryb2xvb3AvZ2Ft
+          ZS9oYW5nYXIvSGFuZ2FyU3VyZmFjZVZpZXcua3QKKysrIGIvYXBwL3NyYy9tYWluL2phdmEvY29t
+          L2FzdHJvbG9vcC9nYW1lL2hhbmdhci9IYW5nYXJTdXJmYWNlVmlldy5rdApAQCAtMTg3Myw2ICsx
+          ODczLDcgQEAgY2xhc3MgSGFuZ2FyU3VyZmFjZVZpZXcoCiAgICAgICAgICAgICAgICAgICAgICAg
+          ICByZXR1cm4gdHJ1ZQogICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAg
+          IERlYnVnQWN0aW9uRGlzcGF0Y2guaGFuZGxlKHJlc3VsdCwgZGVidWdTdGF0ZSwgcGVyc2lzdGVu
+          Y2UsIGRlYnVnSG9zdCkKKyAgICAgICAgICAgICAgICAgICAgaWYgKHJlc3VsdCA9PSAiQUREX1lF
+          TiIpIHN5bmNocm9uaXplZCh1cGdyYWRlTG9jaykgeyBzdGF0ZS5hY3R1YWxZZW4gPSBwZXJzaXN0
+          ZW5jZS5nZXRZZW4oKSB9CiAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgIHJldHVy
+          biB0cnVlCiAgICAgICAgICAgICB9CmRpZmYgLS1naXQgYS9hcHAvc3JjL21haW4vamF2YS9jb20v
+          YXN0cm9sb29wL2dhbWUvcmVuZGVyL0RlYnVnTWVudVJlbmRlcmVyLmt0IGIvYXBwL3NyYy9tYWlu
+          L2phdmEvY29tL2FzdHJvbG9vcC9nYW1lL3JlbmRlci9EZWJ1Z01lbnVSZW5kZXJlci5rdAppbmRl
+          eCA4MDMwMTFkLi44NGEwMWM2IDEwMDY0NAotLS0gYS9hcHAvc3JjL21haW4vamF2YS9jb20vYXN0
+          cm9sb29wL2dhbWUvcmVuZGVyL0RlYnVnTWVudVJlbmRlcmVyLmt0CisrKyBiL2FwcC9zcmMvbWFp
+          bi9qYXZhL2NvbS9hc3Ryb2xvb3AvZ2FtZS9yZW5kZXIvRGVidWdNZW51UmVuZGVyZXIua3QKQEAg
+          LTEzMSw2ICsxMzEsNyBAQCBjbGFzcyBEZWJ1Z01lbnVSZW5kZXJlciB7CiAgICAgcHJpdmF0ZSB2
+          YXIgYXN0cm9Mb29wUmVjdCA9IFJlY3RGKCkKICAgICBwcml2YXRlIHZhciBzZXREZXNlcnRGbGFn
+          c1JlY3QgPSBSZWN0RigpCiAgICAgcHJpdmF0ZSB2YXIgY2xyRGVzZXJ0UmVjdCA9IFJlY3RGKCkK
+          KyAgICBwcml2YXRlIHZhciBhZGRZZW5SZWN0ID0gUmVjdEYoKQogICAgIHByaXZhdGUgdmFyIGxv
+          b3BSZWN0MSA9IFJlY3RGKCkKICAgICBwcml2YXRlIHZhciBsb29wUmVjdDIgPSBSZWN0RigpCiAg
+          ICAgcHJpdmF0ZSB2YXIgbG9vcFJlY3QzID0gUmVjdEYoKQpAQCAtNDQ4LDcgKzQ0OSwxMCBAQCBj
+          bGFzcyBEZWJ1Z01lbnVSZW5kZXJlciB7CiAKICAgICAgICAgeSArPSBidG5IZWlnaHQgKyBnYXAK
+          IAotICAgICAgICAvLyBSb3cgNTogQ0xSIERFU0VSVAorICAgICAgICAvLyBSb3cgNTogKzEsMDAw
+          IFlFTiArIENMUiBERVNFUlQKKyAgICAgICAgYWRkWWVuUmVjdCA9IFJlY3RGKGxlZnRYLCB5LCBs
+          ZWZ0WCArIGJ0bldpZHRoLCB5ICsgYnRuSGVpZ2h0KQorICAgICAgICBkcmF3UGhhc2U0QnV0dG9u
+          KGNhbnZhcywgYWRkWWVuUmVjdCwgIitcdTAwQTUxLDAwMCIsICJUYXAgdG8gYWRkIHllbiIsIDB4
+          RkY0NDQ0MjIudG9JbnQoKSwgMHhGRkNDQ0M0NC50b0ludCgpKQorCiAgICAgICAgIGNsckRlc2Vy
+          dFJlY3QgPSBSZWN0RihyaWdodFgsIHksIHJpZ2h0WCArIGJ0bldpZHRoLCB5ICsgYnRuSGVpZ2h0
+          KQogICAgICAgICBkcmF3UGhhc2U0QnV0dG9uKGNhbnZhcywgY2xyRGVzZXJ0UmVjdCwgIkNMUiBE
+          RVNFUlQiLCAiQ2xlYXIgYWxsIGRlc2VydCIsIDB4RkY0NDIyMjIudG9JbnQoKSwgMHhGRkFBNDQ0
+          NC50b0ludCgpKQogCkBAIC05OTksNiArMTAwMyw3IEBAIGNsYXNzIERlYnVnTWVudVJlbmRlcmVy
+          IHsKICAgICB9CiAKICAgICBwcml2YXRlIGZ1biBwaGFzZTRBY3Rpb24oZXg6IEZsb2F0LCBleTog
+          RmxvYXQpOiBTdHJpbmc/IHsKKyAgICAgICAgaWYgKGFkZFllblJlY3QuY29udGFpbnMoZXgsIGV5
+          KSkgcmV0dXJuICJBRERfWUVOIgogICAgICAgICBpZiAoYm9zc05vd1JlY3QuY29udGFpbnMoZXgs
+          IGV5KSkgcmV0dXJuICJCT1NTX05PVyIKICAgICAgICAgaWYgKHNldENvcnJ1cHRSZWN0LmNvbnRh
+          aW5zKGV4LCBleSkpIHJldHVybiAiU0VUX0NPUlJVUFQiCiAgICAgICAgIGlmIChraWxsUGlsb3RS
+          ZWN0LmNvbnRhaW5zKGV4LCBleSkpIHJldHVybiAiS0lMTF9QSUxPVCIKZGlmZiAtLWdpdCBhL2Fw
+          cC9zcmMvbWFpbi9qYXZhL2NvbS9hc3Ryb2xvb3AvZ2FtZS90dW5pbmcvS25vYnNBc3Rlcm9pZHMu
+          a3QgYi9hcHAvc3JjL21haW4vamF2YS9jb20vYXN0cm9sb29wL2dhbWUvdHVuaW5nL0tub2JzQXN0
+          ZXJvaWRzLmt0CmluZGV4IGM1MDFlNGIuLjUyMzQ3NDEgMTAwNjQ0Ci0tLSBhL2FwcC9zcmMvbWFp
+          bi9qYXZhL2NvbS9hc3Ryb2xvb3AvZ2FtZS90dW5pbmcvS25vYnNBc3Rlcm9pZHMua3QKKysrIGIv
+          YXBwL3NyYy9tYWluL2phdmEvY29tL2FzdHJvbG9vcC9nYW1lL3R1bmluZy9Lbm9ic0FzdGVyb2lk
+          cy5rdApAQCAtNjMsNyArNjMsNyBAQCBvYmplY3QgS25vYnNBc3Rlcm9pZHMgewogICAgIHZhbCBp
+          Y2VTcGxpdE1pbiA9IHNwbGl0cy5pbnQoImljZS5zcGxpdF9taW4iLCAiSWNlIHBpZWNlcywgZmV3
+          ZXN0IiwgMywgbWluID0gMCwgbWF4ID0gMTIpCiAgICAgdmFsIGljZVNwbGl0TWF4ID0gc3BsaXRz
+          LmludCgiaWNlLnNwbGl0X21heCIsICJJY2UgcGllY2VzLCBtb3N0IiwgNCwgbWluID0gMCwgbWF4
+          ID0gMTIpCiAgICAgLyoqIEhvdyBmYXIgb3V0IGEgZnJhZ21lbnQgc3RhcnRzLCBhcyBhIHNoYXJl
+          IG9mIGl0cyBwYXJlbnQncyByYWRpdXMgKCM1OCkuIDEgPSBvbiB0aGUgcmltLCBhcyBiZWZvcmUg
+          MS41LiAqLwotICAgIHZhbCBmcmFnbWVudE9mZnNldCA9IHNwbGl0cy5mbG9hdCgiZnJhZ21lbnRf
+          b2Zmc2V0IiwgIkZyYWdtZW50IHN0YXJ0ICjDlyBwYXJlbnQgcmFkaXVzKSIsIDAuM2YsIG1pbiA9
+          IDBmLCBtYXggPSAxZikKKyAgICB2YWwgZnJhZ21lbnRPZmZzZXQgPSBzcGxpdHMuZmxvYXQoImZy
+          YWdtZW50X29mZnNldCIsICJGcmFnbWVudCBzdGFydCAow5cgcGFyZW50IHJhZGl1cykiLCAwZiwg
+          bWluID0gMGYsIG1heCA9IDFmKQogCiAgICAgcHJpdmF0ZSB2YWwgdm9sYXRpbGVTcGVjaWFsID0g
+          S25vYkdyb3VwKCJBc3Rlcm9pZHMvVHlwZXMvVm9sYXRpbGUiLCAiYXN0ZXJvaWQudm9sYXRpbGUi
+          KQogICAgIHZhbCB2b2xhdGlsZUJsYXN0UmFkaXVzRmFjdG9yID0gdm9sYXRpbGVTcGVjaWFsLmZs
+          b2F0KCJibGFzdF9yYWRpdXNfZmFjdG9yIiwgIkJsYXN0IHJhZGl1cyDDlyBvd24gcmFkaXVzIiwg
+          M2YpCg==
+          PATCH
+          git apply /tmp/mod.patch
+          base64 -d > app/mod-debug.keystore <<'KEY'
           MIIKZgIBAzCCChAGCSqGSIb3DQEHAaCCCgEEggn9MIIJ+TCCBcAGCSqGSIb3DQEHAaCCBbEEggWt
           MIIFqTCCBaUGCyqGSIb3DQEMCgECoIIFQDCCBTwwZgYJKoZIhvcNAQUNMFkwOAYJKoZIhvcNAQUM
           MCsEFGF3c0Lk1y4g2muR+SmuThYBRpVtAgInEAIBIDAMBggqhkiG9w0CCQUAMB0GCWCGSAFlAwQB
@@ -72,21 +187,6 @@ jobs:
           MlinlHEAScImpiPAf7668RdOBBRZafTrYSYzE/4tnoR4W6rJFsZUtgICJxA=
           KEY
 
-          # 3. Separate app ("Astro Loop Mod") with the dev/cheat menu enabled
-          python3 - <<'PY'
-          p = 'app/build.gradle.kts'
-          s = open(p).read()
-          a = '    signingConfigs {\n'
-          b = '        debug {\n            isMinifyEnabled = false\n        }'
-          assert s.count(a) == 1 and s.count(b) == 1, 'build file changed upstream'
-          s = s.replace(a, a + '        getByName("debug") {\n            storeFile = file("mod.keystore")\n            storePassword = "android"\n            keyAlias = "androiddebugkey"\n            keyPassword = "android"\n        }\n')
-          s = s.replace(b, '        debug {\n            isMinifyEnabled = false\n            applicationIdSuffix = ".mod"\n            versionNameSuffix = "-mod"\n        }')
-          open(p, 'w').write(s)
-          PY
-          mkdir -p app/src/debug/res/values
-          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <string name="app_name">Astro Loop Mod</string>\n</resources>\n' \
-            > app/src/debug/res/values/strings.xml
-
       - name: Build
         run: chmod +x gradlew && ./gradlew assembleGameDebug
 
@@ -94,3 +194,4 @@ jobs:
         with:
           name: astro-loop-mod
           path: app/build/outputs/apk/game/debug/*.apk
+
